@@ -24,6 +24,15 @@ type zeiten struct {
 	YoutubeURL string `json:"youtube_url"`
 }
 
+type zeiten struct {
+	Id int64 `json:"id"`
+	KfzVariante int64 `json:"kfz_variante"`
+	Nass int64 `json:"nass"`
+	GemesseneZeit float64 `json:"gemessene_zeit"`
+	
+
+}
+
 type basisKFZ struct {
 	Id int64 `json:"id"`
 	Hersteller int64 `json:"hersteller"`
@@ -81,6 +90,8 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
+	router.GET("/api/v1/tuning/:id", lazyLoadTuning)
+	router.Get("/api/v1/")
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
