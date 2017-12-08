@@ -1,5 +1,7 @@
 package main
 
+import "database/sql"
+
 type zeiten struct {
 	Id int64 `json:"id"`
 	KfzVariante int64 `json:"kfz_variante"`
@@ -9,7 +11,23 @@ type zeiten struct {
 	YoutubeURL string `json:"youtube_url"`
 }
 
-
+type KfzZeiten struct {
+	ZeitenId sql.NullInt64 `json:"zeiten-id"`
+	KfzVariante sql.NullInt64 `json:"kfz_variante"`
+	Nass sql.NullInt64 `json:"nass"`
+	GemesseneZeit sql.NullFloat64 `json:"gemessene_zeit"`
+	YoutubeURL sql.NullString `json:"youtube_url"`
+	VarianteId sql.NullInt64 `json:"kfz_variante_id"`
+	SerieAbWerk sql.NullBool `json:"serie_ab_werk"`
+	PS sql.NullInt64 `json:"ps"`
+	NM sql.NullInt64 `json:"nm"`
+	Tuning sql.NullInt64 `json:"tuning"`
+	BasisKfzId sql.NullInt64 `json:"basis_kfz"`
+	KfzName sql.NullString `json:"kfz_name"`
+	TuningId sql.NullInt64 `json:"tuning"`
+	SerienKfz sql.NullInt64 `json:"serien_kfz"`
+	TuningName sql.NullString `json:"tuning_name"`
+}
 
 // type zeiten struct {
 // 	Id int64 `json:"id"`

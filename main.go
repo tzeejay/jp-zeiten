@@ -19,30 +19,13 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
-	//router.GET("/api/v1/tuning/:id", lazyLoadTuning)
+	router.GET("/api/v1/zeiten_0_100", apiv1zeiten0100)
+	router.GET("/api/v1/zeiten_50_150", apiv1zeiten50150)
 	//router.Get("/api/v1/")
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
-}
-
-type KfzZeiten struct {
-  ZeitenId sql.NullInt64 `json:"zeiten-id"`
-	KfzVariante sql.NullInt64 `json:"kfz_variante"`
-	Nass sql.NullInt64 `json:"nass"`
-	GemesseneZeit sql.NullFloat64 `json:"gemessene_zeit"`
-	YoutubeURL sql.NullString `json:"youtube_url"`
-  VarianteId sql.NullInt64 `json:"kfz_variante_id"`
-  SerieAbWerk sql.NullBool `json:"serie_ab_werk"`
-  PS sql.NullInt64 `json:"ps"`
-  NM sql.NullInt64 `json:"nm"`
-  Tuning sql.NullInt64 `json:"tuning"`
-  BasisKfzId sql.NullInt64 `json:"basis_kfz"`
-  KfzName sql.NullString `json:"kfz_name"`
-  TuningId sql.NullInt64 `json:"tuning"`
-  SerienKfz sql.NullInt64 `json:"serien_kfz"`
-  TuningName sql.NullString `json:"tuning_name"`
 }
 
 func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -68,6 +51,16 @@ func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ ht
     }
 		zeitenArray = append(zeitenArray, queriedTime)
   }
-	json, _ := json.Marshal(zeitenArray)
-	response.Write(json)
+	apijson, _ := json.Marshal(zeitenArray)
+	response.Write(apijson)
+}
+
+
+func apiv1zeiten0100(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
+}
+
+
+func apiv1zeiten50150(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
 }
