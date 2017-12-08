@@ -15,87 +15,34 @@ import (
 
 var database *sql.DB
 
-type zeiten struct {
-	Id int64 `json:"id"`
-	KfzVariante int64 `json:"kfz_variante"`
-	Zeituhr int64 `json:"zeituhr"`
-	Nass int64 `json:"nass"`
-	GemesseneZeit float64 `json:"gemessene_zeit"`
-	YoutubeURL string `json:"youtube_url"`
-}
-
-type zeiten struct {
-	Id int64 `json:"id"`
-	KfzVariante int64 `json:"kfz_variante"`
-	Nass int64 `json:"nass"`
-	GemesseneZeit float64 `json:"gemessene_zeit"`
-	
-
-}
-
-type basisKFZ struct {
-	Id int64 `json:"id"`
-	Hersteller int64 `json:"hersteller"`
-	KFZName string `json:"kfz_name"`
-	Herstellungsjahr int64 `json:"herstellungsjahr"`
-}
-
-type getriebe struct {
-	Id int64 `json:"id"`
-	GetriebeBezeichnung string `json:"getriebe_bezeichnung"`
-	GanzAnzahl int64 `json:"gang_anzahl"`
-}
-
-type KFZHersteller struct {
-	Id int64 `json:"id"`
-	HerstellerName string `json:"hersteller_name"`
-}
-
-type KFZVariante struct {
-	Id int64 `json:"id"`
-	SerieAbWerk bool `json:"serie_ab_werk"`
-	SerienKFZ int64 `json:"serien_kfz"`
-	PS int64 `json:"ps"`
-	PSGemessen bool `json:"ps_gemessen"`
-	NM int64 `json:"nm"`
-	NMGemessen bool `json:"nm_gemessen"`
-	Gewicht int64 `json:"gewicht"`
-	GewichtGemessen bool `json:"gewicht_gemessen"`
-	Tuning int64 `json:"tuning"`
-	Getriebe int64 `json:"getriebe"`
-}
-
-type tuning struct {
-	Id int64 `json:"id"`
-	SerienKFZ int64 `json:"serien_kfz"`
-	TuningName string `json:"tuning_name"`
-	TuningBeschreibung string `json:"tuning_beschreibung"`
-	Ansaugung bool `json:"ansaugung"`
-	Abgasanlage bool `json:"abgasanlage"`
-	Ladedruck bool `json:"ladedruck"`
-	Fahrwerk bool  `json:"fahrwerk"`
-	Luftfahrwerk bool `json:"luftfahrwerk"`
-	Bremsanlage bool `json:"bremsanlage"`
-	Getriebe bool `json:"getriebe"`
-	Software bool `json:"software"`
-	GewichtsVerringerung bool `json:"gewicht_verringerung"`
-	Reifen bool `json:"reifen"`
-	Karosserie bool `json:"karosserie"`
-	Aerodynamik bool `json:"aerodynamik"`
-	Plus10PSProSticker bool `json:"plus_10_ps_pro_sticker"`
-	StickerAnzahl int64 `json:"sticker_anzahl"`
-}
-
 func main() {
 
 	router := httprouter.New()
 	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
-	router.GET("/api/v1/tuning/:id", lazyLoadTuning)
-	router.Get("/api/v1/")
+	//router.GET("/api/v1/tuning/:id", lazyLoadTuning)
+	//router.Get("/api/v1/")
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
+}
+
+type KfzZeiten struct {
+  ZeitenId sql.NullInt64 `json:"zeiten-id"`
+	KfzVariante sql.NullInt64 `json:"kfz_variante"`
+	Nass sql.NullInt64 `json:"nass"`
+	GemesseneZeit sql.NullFloat64 `json:"gemessene_zeit"`
+	YoutubeURL sql.NullString `json:"youtube_url"`
+  VarianteId sql.NullInt64 `json:"kfz_variante_id"`
+  SerieAbWerk sql.NullBool `json:"serie_ab_werk"`
+  PS sql.NullInt64 `json:"ps"`
+  NM sql.NullInt64 `json:"nm"`
+  Tuning sql.NullInt64 `json:"tuning"`
+  BasisKfzId sql.NullInt64 `json:"basis_kfz"`
+  KfzName sql.NullString `json:"kfz_name"`
+  TuningId sql.NullInt64 `json:"tuning"`
+  SerienKfz sql.NullInt64 `json:"serien_kfz"`
+  TuningName sql.NullString `json:"tuning_name"`
 }
 
 func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -105,22 +52,22 @@ func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ ht
     log.Panic()
   }
 
-	rows, qerror := database.Query("SELECT * FROM zeiten_100_200")
+	rows, qerror := database.Query("SELECT zeiten_100_200.id, zeiten_100_200.kfz_variante, zeiten_100_200.nass, zeiten_100_200.gemessene_zeit, zeiten_100_200.youtube_url, kfz_variante.id, kfz_variante.serie_ab_werk, kfz_variante.ps, kfz_variante.nm, kfz_variante.tuning, basis_kfz.id, basis_kfz.kfz_name, tuning.id, tuning.serien_kfz, tuning.tuning_name FROM zeiten_100_200 INNER JOIN kfz_variante ON zeiten_100_200.kfz_variante =  kfz_variante.id INNER JOIN basis_kfz ON kfz_variante.serien_kfz = basis_kfz.id LEFT OUTER JOIN tuning ON kfz_variante.tuning = tuning.id")
   if qerror != nil {
     log.Fatal(qerror)
   }
 
-	zeitenArray := make([]*zeiten, 0)
+	zeitenArray := make([]*KfzZeiten, 0)
 
   for rows.Next() {
-    queriedTime := new(zeiten)
+    queriedTime := new(KfzZeiten)
 
-    err := rows.Scan(&queriedTime.Id, &queriedTime.KfzVariante, &queriedTime.Zeituhr, &queriedTime.Nass, &queriedTime.GemesseneZeit, &queriedTime.YoutubeURL)
+    err := rows.Scan(&queriedTime.ZeitenId, &queriedTime.KfzVariante, &queriedTime.Nass, &queriedTime.GemesseneZeit, &queriedTime.YoutubeURL, &queriedTime.VarianteId, &queriedTime.SerieAbWerk, &queriedTime.PS, &queriedTime.NM, &queriedTime.Tuning, &queriedTime.BasisKfzId, &queriedTime.KfzName, &queriedTime.TuningId, &queriedTime.SerienKfz, &queriedTime.TuningName)
     if err != nil {
       log.Fatal(err)
     }
 		zeitenArray = append(zeitenArray, queriedTime)
   }
-	json, _ := json.MarshalIndent(zeitenArray, "", " ")
+	json, _ := json.Marshal(zeitenArray)
 	response.Write(json)
 }
