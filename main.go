@@ -21,19 +21,61 @@ func main() {
 	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
 	router.GET("/api/v1/zeiten_0_100", apiv1zeiten0100)
 	router.GET("/api/v1/zeiten_50_150", apiv1zeiten50150)
-	//router.Get("/api/v1/")
+	router.GET("/api/v1/test", testfunc)
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
 
+type Test struct {
+	BasisKFZID int64
+	KFZName string
+	Herstellungsjahr int64
+	hersteller
+}
+
+type hersteller struct {
+	KFZID int64
+	HerstellerName string
+}
+
+func testfunc (response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	database, dberror := sql.Open("postgres", "user=cj dbname=jp-zeiten sslmode=disable")
+	if dberror != nil {
+		log.Fatal(dberror)
+	}
+
+	rows, qerror := database.Query("SELECT * FROM basis_kfz INNER JOIN kfz_hersteller ON basis_kfz.hersteller = kfz_hersteller.id")
+	if qerror != nil {
+		log.Fatal(qerror)
+	}
+
+	asmdk := make([]*Test, 0)
+
+	for rows.Next() {
+		newitem := new(Test)
+		err := rows.Scan(&newitem.BasisKFZID, &newitem.KFZName, &newitem.Herstellungsjahr, &newitem.hersteller.KFZID, &newitem.hersteller.HerstellerName)
+
+		if err != nil {
+			log.Panic()
+		}
+
+		asmdk = append(asmdk, newitem)
+	}
+
+	jsonify, _ := json.Marshal(asmdk)
+	response.Write(jsonify)
+
+}
+
+
 func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	database, dberror := sql.Open("postgres", "user=cj dbname=jp-zeiten sslmode=disable")
-  if dberror != nil {
-    log.Panic()
-  }
+	if dberror != nil {
+		log.Panic()
+  	}
 
 	rows, qerror := database.Query("SELECT zeiten_100_200.id, zeiten_100_200.kfz_variante, zeiten_100_200.nass, zeiten_100_200.gemessene_zeit, zeiten_100_200.youtube_url, kfz_variante.id, kfz_variante.serie_ab_werk, kfz_variante.ps, kfz_variante.nm, kfz_variante.tuning, basis_kfz.id, basis_kfz.kfz_name, tuning.id, tuning.serien_kfz, tuning.tuning_name FROM zeiten_100_200 INNER JOIN kfz_variante ON zeiten_100_200.kfz_variante =  kfz_variante.id INNER JOIN basis_kfz ON kfz_variante.serien_kfz = basis_kfz.id LEFT OUTER JOIN tuning ON kfz_variante.tuning = tuning.id")
   if qerror != nil {
