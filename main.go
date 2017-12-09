@@ -29,15 +29,16 @@ func main() {
 }
 
 type Test struct {
-	BasisKFZID int64
-	KFZName string
-	Herstellungsjahr int64
-	hersteller
+	BasisKFZID int64 `json:"id"`
+	HerstellerID int64 `json:"hersteller_id"`
+	KFZName string `json:"kfz_name"`
+	Herstellungsjahr int64 `json:"herstellungsjahr"`
+	hersteller `json:"hersteller"`
 }
 
 type hersteller struct {
-	KFZID int64
-	HerstellerName string
+	KFZID int64 `json:"id"`
+	HerstellerName string `json:"hersteller_name"`
 }
 
 func testfunc (response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
@@ -55,16 +56,16 @@ func testfunc (response http.ResponseWriter, request *http.Request, _ httprouter
 
 	for rows.Next() {
 		newitem := new(Test)
-		err := rows.Scan(&newitem.BasisKFZID, &newitem.KFZName, &newitem.Herstellungsjahr, &newitem.hersteller.KFZID, &newitem.hersteller.HerstellerName)
+		err := rows.Scan(&newitem.BasisKFZID, &newitem.HerstellerID, &newitem.KFZName, &newitem.Herstellungsjahr, &newitem.hersteller.KFZID, &newitem.hersteller.HerstellerName)
 
 		if err != nil {
-			log.Panic()
+			log.Fatal(err)
 		}
 
 		asmdk = append(asmdk, newitem)
 	}
 
-	jsonify, _ := json.Marshal(asmdk)
+	jsonify, _ := json.MarshalIndent(asmdk, "", " ")
 	response.Write(jsonify)
 
 }
