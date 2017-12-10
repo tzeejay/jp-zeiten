@@ -21,27 +21,14 @@ func main() {
 	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
 	router.GET("/api/v1/zeiten_0_100", apiv1zeiten0100)
 	router.GET("/api/v1/zeiten_50_150", apiv1zeiten50150)
-	router.GET("/api/v1/test", testfunc)
+	//router.GET("/api/v1/test", testfunc)
 
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 
 }
 
-type Test struct {
-	BasisKFZID int64 `json:"id"`
-	HerstellerID int64 `json:"hersteller_id"`
-	KFZName string `json:"kfz_name"`
-	Herstellungsjahr int64 `json:"herstellungsjahr"`
-	hersteller `json:"hersteller"`
-}
-
-type hersteller struct {
-	KFZID int64 `json:"id"`
-	HerstellerName string `json:"hersteller_name"`
-}
-
-func testfunc (response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+/*func testfunc (response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	database, dberror := sql.Open("postgres", "user=cj dbname=jp-zeiten sslmode=disable")
 	if dberror != nil {
 		log.Fatal(dberror)
@@ -68,27 +55,27 @@ func testfunc (response http.ResponseWriter, request *http.Request, _ httprouter
 	jsonify, _ := json.MarshalIndent(asmdk, "", " ")
 	response.Write(jsonify)
 
-}
+}*/
 
 
 func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	database, dberror := sql.Open("postgres", "user=cj dbname=jp-zeiten sslmode=disable")
 	if dberror != nil {
-		log.Panic()
+		log.Fatal(dberror)
   	}
 
-	rows, qerror := database.Query("SELECT zeiten_100_200.id, zeiten_100_200.kfz_variante, zeiten_100_200.nass, zeiten_100_200.gemessene_zeit, zeiten_100_200.youtube_url, kfz_variante.id, kfz_variante.serie_ab_werk, kfz_variante.ps, kfz_variante.nm, kfz_variante.tuning, basis_kfz.id, basis_kfz.kfz_name, tuning.id, tuning.serien_kfz, tuning.tuning_name FROM zeiten_100_200 INNER JOIN kfz_variante ON zeiten_100_200.kfz_variante =  kfz_variante.id INNER JOIN basis_kfz ON kfz_variante.serien_kfz = basis_kfz.id LEFT OUTER JOIN tuning ON kfz_variante.tuning = tuning.id")
+	rows, qerror := database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.herstellungsjahr FROM zeiten_100_200 AS t1	INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id	INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
   if qerror != nil {
     log.Fatal(qerror)
   }
 
-	zeitenArray := make([]*KfzZeiten, 0)
+	zeitenArray := make([]*Zeiten, 0)
 
   for rows.Next() {
-    queriedTime := new(KfzZeiten)
+    queriedTime := new(Zeiten)
 
-    err := rows.Scan(&queriedTime.ZeitenId, &queriedTime.KfzVariante, &queriedTime.Nass, &queriedTime.GemesseneZeit, &queriedTime.YoutubeURL, &queriedTime.VarianteId, &queriedTime.SerieAbWerk, &queriedTime.PS, &queriedTime.NM, &queriedTime.Tuning, &queriedTime.BasisKfzId, &queriedTime.KfzName, &queriedTime.TuningId, &queriedTime.SerienKfz, &queriedTime.TuningName)
+    err := rows.Scan(&queriedTime.KFZVariante, &queriedTime.GemesseneZeit, &queriedTime.KFZVarianteID, &queriedTime.SerienKFZ, &queriedTime.SerienKFZID, &queriedTime.KFZName, &queriedTime.Herstellungsjahr)
     if err != nil {
       log.Fatal(err)
     }

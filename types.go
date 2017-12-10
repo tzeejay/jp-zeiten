@@ -11,6 +11,16 @@ type zeiten struct {
 	YoutubeURL string `json:"youtube_url"`
 }
 
+type Zeiten struct {
+	KFZVariante int64 `json:"kfz_variante"`
+	GemesseneZeit float64 `json:"gemessene_zeit"`
+	KFZVarianteID int64 `json:"-"`
+	SerienKFZ int64 `json:"serien_kfz"`
+	SerienKFZID int64 `json:"-"`
+	KFZName string  `json:"kfz_name"`
+	Herstellungsjahr int64 `json:"herstellungsjahr"`
+}
+
 type KfzZeiten struct {
 	ZeitenId sql.NullInt64 `json:"zeiten-id"`
 	KfzVariante sql.NullInt64 `json:"kfz_variante"`
