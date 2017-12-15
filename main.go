@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "errors"
 	_"fmt"
 	_ "io"
@@ -21,6 +22,8 @@ func main() {
 	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
 	router.GET("/api/v1/zeiten_0_100", apiv1zeiten0100)
 	router.GET("/api/v1/zeiten_50_150", apiv1zeiten50150)
+	router.GET("/api/v1/hersteller/", getHersteller)
+	router.POST("/api/v1/hersteller/", addHersteller)
 	//router.GET("/api/v1/test", testfunc)
 
 	log.Println("Listening on :8080")
@@ -65,32 +68,59 @@ func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ ht
 		log.Fatal(dberror)
   	}
 
-	rows, qerror := database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.herstellungsjahr FROM zeiten_100_200 AS t1	INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id	INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
-  if qerror != nil {
-    log.Fatal(qerror)
-  }
+	rows, qerror := database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_100_200 AS t1	INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id	INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
+  	if qerror != nil {
+    	log.Fatal(qerror)
+  	}
 
 	zeitenArray := make([]*Zeiten, 0)
 
-  for rows.Next() {
-    queriedTime := new(Zeiten)
+  	for rows.Next() {
+    	queriedTime := new(Zeiten)
 
-    err := rows.Scan(&queriedTime.KFZVariante, &queriedTime.GemesseneZeit, &queriedTime.KFZVarianteID, &queriedTime.SerienKFZ, &queriedTime.SerienKFZID, &queriedTime.KFZName, &queriedTime.Herstellungsjahr)
-    if err != nil {
-      log.Fatal(err)
-    }
+    	err := rows.Scan(&queriedTime.KFZVariante, &queriedTime.GemesseneZeit, &queriedTime.KFZVarianteID, &queriedTime.SerienKFZ, &queriedTime.SerienKFZID, &queriedTime.KFZName, &queriedTime.Fabrikationsjahr)
+    	if err != nil {
+      		log.Fatal(err)
+    	}
 		zeitenArray = append(zeitenArray, queriedTime)
   }
 	apijson, _ := json.Marshal(zeitenArray)
 	response.Write(apijson)
 }
 
-
 func apiv1zeiten0100(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
-
 }
-
-
 func apiv1zeiten50150(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+}
+
+type something struct {
+	Kfzhersteller string `json:"kfz_hersteller"`
+}
+
+// curl -X POST localhost:8080/api/v1/hersteller/ -d "{\"kfz_hersteller\":\"alkdamds\"}"
+func addHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	database, dberror := sql.Open("postgres", "user=cj dbname=jp-zeiten sslmode=disable")
+	if dberror != nil {
+		log.Fatal(dberror)
+	}
+
+	var ada something
+	err := json.NewDecoder(request.Body).Decode(&ada)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println(ada.Kfzhersteller)
+
+	insertString := fmt.Sprintf("INSERT (hersteller_name) INTO kfz_hersteller VALUES (%v)", ada.Kfzhersteller)
+	log.Println(insertString)
+	insertError := database.QueryRow(insertString)
+	if insertError != nil {
+		log.Fatal("Insert error:", insertError)
+	}
+}
+
+func getHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 }
+

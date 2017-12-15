@@ -18,7 +18,7 @@ type Zeiten struct {
 	SerienKFZ int64 `json:"serien_kfz"`
 	SerienKFZID int64 `json:"-"`
 	KFZName string  `json:"kfz_name"`
-	Herstellungsjahr int64 `json:"herstellungsjahr"`
+	Fabrikationsjahr int64 `json:"fabrikationsjahr"`
 }
 
 type KfzZeiten struct {
@@ -52,7 +52,7 @@ type basisKFZ struct {
 	Id int64 `json:"id"`
 	Hersteller int64 `json:"hersteller"`
 	KFZName string `json:"kfz_name"`
-	Herstellungsjahr int64 `json:"herstellungsjahr"`
+	Fabrikationsjahr int64 `json:"fabrikationsjahr"`
 }
 
 type getriebe struct {
