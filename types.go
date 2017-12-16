@@ -39,15 +39,6 @@ type KfzZeiten struct {
 	TuningName sql.NullString `json:"tuning_name"`
 }
 
-// type zeiten struct {
-// 	Id int64 `json:"id"`
-// 	KfzVariante int64 `json:"kfz_variante"`
-// 	Nass int64 `json:"nass"`
-// 	GemesseneZeit float64 `json:"gemessene_zeit"`
-//
-//
-// }
-
 type basisKFZ struct {
 	Id int64 `json:"id"`
 	Hersteller int64 `json:"hersteller"`
