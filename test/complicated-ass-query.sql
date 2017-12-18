@@ -1,1 +1,0 @@
-SELECT t1.kfz_variante, t1.nass, t1.gemessene_zeit, t2.id, t2.serie_ab_werk, t2.ps, t2.nm, t2.tuning, t2.serien_kfz, t3.id, t3.kfz_name, t4.id, t4.serien_kfz, t4.tuning_name from zeiten_100_200 t1 inner join kfz_variante t2 on t1.kfz_variante =  t2.id inner join basis_kfz t3 on t2.serien_kfz = t3.id inner join tuning t4 on t2.serien_kfz = t4.id;

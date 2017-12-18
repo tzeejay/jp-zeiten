@@ -39,14 +39,14 @@ type KfzZeiten struct {
 	TuningName sql.NullString `json:"tuning_name"`
 }
 
-type basisKFZ struct {
+type BasisKFZ struct {
 	Id int64 `json:"id"`
 	Hersteller int64 `json:"hersteller"`
 	KFZName string `json:"kfz_name"`
 	Fabrikationsjahr int64 `json:"fabrikationsjahr"`
 }
 
-type getriebe struct {
+type Getriebe struct {
 	Id int64 `json:"id"`
 	GetriebeBezeichnung string `json:"getriebe_bezeichnung"`
 	GanzAnzahl int64 `json:"gang_anzahl"`
@@ -71,7 +71,7 @@ type KFZVariante struct {
 	Getriebe int64 `json:"getriebe"`
 }
 
-type tuning struct {
+type Tuning struct {
 	Id int64 `json:"id"`
 	SerienKFZ int64 `json:"serien_kfz"`
 	TuningName string `json:"tuning_name"`

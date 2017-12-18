@@ -19,17 +19,22 @@ func main() {
 	
 	// Initial check to see if the database is available at startup
 	// before we add the routes
-	if postgresOnline(); false {
-		log.Fatal()
+	if success := postgresOnline(); success != true {
+		log.Fatal("Db is offline")
 	}
 	
 	// Adding routes
 	router := httprouter.New()
-	router.GET("/api/v1/zeiten_100_200", apiv1Zeiten100200)
-	router.GET("/api/v1/zeiten_0_100", apiv1zeiten0100)
-	router.GET("/api/v1/zeiten_50_150", apiv1zeiten50150)
-	router.GET("/api/v1/hersteller", apiv1getHersteller)
-	router.POST("/api/v1/hersteller", apiv1addHersteller)
+	
+	// GETs
+	router.GET("/api/v1/zeiten_100_200", apiv1GetZeiten100200)
+	router.GET("/api/v1/zeiten_0_100", apiv1GetZeiten0100)
+	router.GET("/api/v1/zeiten_50_150", apiv1GetZeiten50150)
+	router.GET("/api/v1/kfz_hersteller", apiv1GetHersteller)
+	router.GET("/api/v1/basis_kfz", apiv1GetBasisKFZ)
+	
+	// POSTs
+	router.POST("/api/v1/hersteller", apiv1AddHersteller)
 	//router.GET("/api/v1/test", testfunc)
 
 	log.Println("Listening on :8080")
@@ -37,8 +42,9 @@ func main() {
 
 }
 
+
 /* curl localhost:8080/api/v1/zeiten_100_200 */
-func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func apiv1GetZeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	rows, qerror := Database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_100_200 AS t1 INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
   	if qerror != nil {
@@ -59,8 +65,9 @@ func apiv1Zeiten100200(response http.ResponseWriter, request *http.Request, _ ht
 	response.Write(apijson)
 }
 
+
 /* curl localhost:8080/api/v1/zeiten_0_100 */
-func apiv1zeiten0100(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func apiv1GetZeiten0100(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	rows, qerror := Database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_0_100 AS t1 INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
 	if qerror != nil {
@@ -81,8 +88,9 @@ func apiv1zeiten0100(response http.ResponseWriter, request *http.Request, _ http
 	response.Write(apijson)
 }
 
+
 /* curl localhost:8080/api/v1/zeiten_50_150 */
-func apiv1zeiten50150(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+func apiv1GetZeiten50150(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	rows, qerror := Database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_0_100 AS t1 INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
 	if qerror != nil {
@@ -103,8 +111,9 @@ func apiv1zeiten50150(response http.ResponseWriter, request *http.Request, _ htt
 	response.Write(apijson)
 }
 
-/* curl -X POST localhost:8080/api/v1/hersteller/ -d "{\"kfz_hersteller\":\"Herstller\"}" */
-func apiv1addHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
+/* curl -X POST localhost:8080/api/v1/kfz_hersteller/ -d "{\"kfz_hersteller\":\"Herstller\"}" */
+func apiv1AddHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	
 	// Just in case we'd like to keep track of 
 	var ada map[string]interface{}
@@ -125,8 +134,9 @@ func apiv1addHersteller(response http.ResponseWriter, request *http.Request, _ h
 	response.WriteHeader(http.StatusCreated)
 }
 
-/* curl localhost:8080/api/v1/hersteller */
-func apiv1getHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+
+/* curl localhost:8080/api/v1/kfz_hersteller */
+func apiv1GetHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 		
 	rows, queryError := Database.Query("SELECT * FROM kfz_hersteller")
 	if queryError != nil {
@@ -146,6 +156,30 @@ func apiv1getHersteller(response http.ResponseWriter, request *http.Request, _ h
 		herstellerArray = append(herstellerArray, hersteller)	
 	}
 	apijson, _ := json.Marshal(herstellerArray)
+	response.Write(apijson)
+}
+
+
+/* curl http://localhost:8080/api/v1/basis_kfz */
+func apiv1GetBasisKFZ(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+	
+	rows, queryError := Database.Query("SELECT * FROM basis_kfz")
+	if queryError != nil {
+		log.Fatal(queryError)
+	}
+	
+	kfzArray := make([]*BasisKFZ, 0)
+	
+	for rows.Next() {
+		kfz := new(BasisKFZ)
+		
+		if err := rows.Scan(&kfz.Id, &kfz.Hersteller, &kfz.KFZName, &kfz.Fabrikationsjahr); err != nil {
+			log.Fatal(err)
+		}
+		
+		kfzArray = append(kfzArray, kfz)
+	}
+	apijson, _ := json.Marshal(kfzArray)
 	response.Write(apijson)
 }
 
