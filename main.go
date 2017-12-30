@@ -27,14 +27,14 @@ func main() {
 	router := httprouter.New()
 	
 	// GETs
-	router.GET("/api/v1/zeiten_100_200", apiv1GetZeiten100200)
-	router.GET("/api/v1/zeiten_0_100", apiv1GetZeiten0100)
-	router.GET("/api/v1/zeiten_50_150", apiv1GetZeiten50150)
-	router.GET("/api/v1/kfz_hersteller", apiv1GetHersteller)
-	router.GET("/api/v1/basis_kfz", apiv1GetBasisKFZ)
+	router.GET("/api/v1/zeiten-100-200", apiv1GetZeiten100200)
+	router.GET("/api/v1/zeiten-0-100", apiv1GetZeiten0100)
+	router.GET("/api/v1/zeiten-50-150", apiv1GetZeiten50150)
+	router.GET("/api/v1/kfz-hersteller", apiv1GetHersteller)
+	router.GET("/api/v1/basis-kfz", apiv1GetBasisKFZ)
 	
 	// POSTs
-	router.POST("/api/v1/hersteller", apiv1AddHersteller)
+	router.POST("/api/v1/kfz-hersteller", apiv1AddHersteller)
 	//router.GET("/api/v1/test", testfunc)
 
 	log.Println("Listening on :8080")
@@ -43,7 +43,7 @@ func main() {
 }
 
 
-/* curl localhost:8080/api/v1/zeiten_100_200 */
+/* curl localhost:8080/api/v1/zeiten-100-200 */
 func apiv1GetZeiten100200(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	rows, qerror := Database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_100_200 AS t1 INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
@@ -66,7 +66,7 @@ func apiv1GetZeiten100200(response http.ResponseWriter, request *http.Request, _
 }
 
 
-/* curl localhost:8080/api/v1/zeiten_0_100 */
+/* curl localhost:8080/api/v1/zeiten-0-100 */
 func apiv1GetZeiten0100(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	rows, qerror := Database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_0_100 AS t1 INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
@@ -89,7 +89,7 @@ func apiv1GetZeiten0100(response http.ResponseWriter, request *http.Request, _ h
 }
 
 
-/* curl localhost:8080/api/v1/zeiten_50_150 */
+/* curl localhost:8080/api/v1/zeiten-50-150 */
 func apiv1GetZeiten50150(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 
 	rows, qerror := Database.Query("SELECT t1.kfz_variante, t1.gemessene_zeit, t2.id, t2.serien_kfz, t3.id, t3.kfz_name, t3.fabrikationsjahr FROM zeiten_0_100 AS t1 INNER JOIN kfz_variante AS t2 ON t1.kfz_variante = t2.id INNER JOIN basis_kfz AS t3 ON t2.serien_kfz = t3.id")
@@ -112,7 +112,7 @@ func apiv1GetZeiten50150(response http.ResponseWriter, request *http.Request, _ 
 }
 
 
-/* curl -X POST localhost:8080/api/v1/kfz_hersteller/ -d "{\"kfz_hersteller\":\"Herstller\"}" */
+/* curl -X POST localhost:8080/api/v1/kfz-hersteller/ -d "{\"kfz_hersteller\":\"Herstller\"}" */
 func apiv1AddHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 	
 	// Just in case we'd like to keep track of 
@@ -135,7 +135,7 @@ func apiv1AddHersteller(response http.ResponseWriter, request *http.Request, _ h
 }
 
 
-/* curl localhost:8080/api/v1/kfz_hersteller */
+/* curl localhost:8080/api/v1/kfz-hersteller */
 func apiv1GetHersteller(response http.ResponseWriter, request *http.Request, _ httprouter.Params) {
 		
 	rows, queryError := Database.Query("SELECT * FROM kfz_hersteller")
